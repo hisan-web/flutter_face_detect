@@ -15,6 +15,13 @@
 ## 使用方法
 <font face="微软雅黑" size="18" color="#ff0000">注意：插件中未进行权限处理，需自行在flutter层面进行权限处理，需要以下权限：</font>
 ##### 摄像头权限、本地存储权限、网络权限
+```
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
 ----------------------
 ### 1、引擎注册
 ```
