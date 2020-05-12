@@ -119,6 +119,22 @@ public class FaceDetectCameraView implements PlatformView, MethodCallHandler, On
             case "loadCameraView":
                 showRectView = (boolean) call.argument("showRectView");
                 break;
+            case "initEngine":
+                initEngine();
+                if (afCode!=ErrorInfo.MOK) {
+                    result.error(""+afCode,"引擎初始化失败","");
+                } else {
+                    result.success(true);
+                }
+                break;
+            case  "unInitEngine":
+                unInitEngine();
+                if (afCode!=ErrorInfo.MOK) {
+                    result.error(""+afCode,"引擎销毁失败","");
+                } else {
+                    result.success(true);
+                }
+                break;
             default:
                 result.notImplemented();
         }

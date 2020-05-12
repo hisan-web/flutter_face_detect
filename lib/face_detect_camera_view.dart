@@ -63,6 +63,16 @@ class FaceDetectCameraController {
     }, onError: error);
   }
 
+  /// 人脸检测引擎初始化
+  Future<void> initEngine() async {
+    _methodChannel.invokeMethod("initEngine");
+  }
+
+  /// 销毁引擎
+  Future<void> unInitEngine() async {
+    _methodChannel.invokeMethod("unInitEngine");
+  }
+
   FaceDetectCameraController.init(int id, {bool showRectView, bool showInfo}) {
     _methodChannel = MethodChannel("com.hs.face/face_detect_camera_view_method_$id");
     _methodChannel.invokeMethod("loadCameraView", {
