@@ -32,6 +32,7 @@ import com.hs.face.widget.FaceRectView;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -146,7 +147,6 @@ public class FaceDetectCameraView implements PlatformView, MethodCallHandler, On
     private void initCamera() {
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        Log.i(TAG,"previewView的尺寸，宽度为："+previewView.getMeasuredWidth()+"，高度为："+previewView.getMeasuredHeight());
         CameraListener cameraListener = new CameraListener() {
             @Override
             public void onCameraOpened(Camera camera, int cameraId, int displayOrientation, boolean isMirror) {
@@ -185,18 +185,15 @@ public class FaceDetectCameraView implements PlatformView, MethodCallHandler, On
                 if ((ageCode | genderCode | face3DAngleCode | livenessCode) != ErrorInfo.MOK) {
                     return;
                 }
-
-                if (faceRectView != null && drawHelper != null) {
-                    List<DrawInfo> drawInfoList = new ArrayList<>();
-                    for (int i = 0; i < faceInfoList.size(); i++) {
-                        Log.i(TAG,"性别："+genderInfoList.get(i).getGender());
-                        Log.i(TAG,"年龄："+ageInfoList.get(i).getAge());
-                        drawInfoList.add(new DrawInfo(drawHelper.adjustRect(faceInfoList.get(i).getRect()), genderInfoList.get(i).getGender(), ageInfoList.get(i).getAge(), faceLivenessInfoList.get(i).getLiveness(), RecognizeColor.COLOR_UNKNOWN, null));
-                    }
-                    streamHandlerImpl.eventSinkSuccess(JSON.toJSONString(drawInfoList));
-                    if (showRectView) {
-                        drawHelper.draw(faceRectView, drawInfoList);
-                    }
+                List<DrawInfo> drawInfoList = new ArrayList<>();
+                for (int i = 0; i < faceInfoList.size(); i++) {
+                    int faceId = faceInfoList.get(i).getFaceId();
+                    drawInfoList.add(new DrawInfo(drawHelper.adjustRect(faceInfoList.get(i).getRect()), genderInfoList.get(i).getGender(), ageInfoList.get(i).getAge(), faceLivenessInfoList.get(i).getLiveness(), RecognizeColor.COLOR_UNKNOWN, null));
+                }
+                streamHandlerImpl.eventSinkSuccess(JSON.toJSONString(drawInfoList));
+                // 画人脸追踪框
+                if (faceRectView != null && drawHelper != null && showRectView) {
+                    drawHelper.draw(faceRectView, drawInfoList);
                 }
             }
 
@@ -235,12 +232,27 @@ public class FaceDetectCameraView implements PlatformView, MethodCallHandler, On
      */
     private void initEngine() {
         faceEngine = new FaceEngine();
-        afCode = faceEngine.init(activity, DetectMode.ASF_DETECT_MODE_VIDEO, ConfigUtil.getFtOrient(activity),
-                16, 20, FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_AGE | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_GENDER | FaceEngine.ASF_LIVENESS);
-        Log.i(TAG, "initEngine:  init: " + afCode);
+        DetectMode detectMode = DetectMode.ASF_DETECT_MODE_VIDEO;
+        /**
+         * ASF_FACE_DETECT - 人脸检测
+         * ASF_FACE_RECOGNITION - 人脸特征
+         * ASF_AGE - 年龄
+         * ASF_GENDER - 性别
+         * ASF_FACE3DANGLE - 3D角度
+         * ASF_LIVENESS - RGB活体
+         * ASF_IR_LIVENESS - IR活体
+         * 人脸识别时一般都需要ASF_FACE_DETECT和ASF_FACERECOGNITION这两个属性。
+         * 需要防止纸张、屏幕等攻击可以传入ASF_LIVENESS和ASF_IR_LIVENESS，RGB和IR活体检测根据用户的摄像头类型及实际的业务需求来决定如何选择。
+         * ASF_AGE/ASF_GENDER/ASF_FACE3DANGLE根据业务需求进行选择即可。
+         */
+        int combinedMask = FaceEngine.ASF_FACE_DETECT | FaceEngine.ASF_FACE_RECOGNITION | FaceEngine.ASF_LIVENESS | FaceEngine.ASF_IR_LIVENESS | FaceEngine.ASF_AGE | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_GENDER;
+        int detectFaceScaleVal = 16;
+        int detectFaceMaxNum = 20;
+        afCode = faceEngine.init(activity, detectMode, ConfigUtil.getFtOrient(activity), detectFaceScaleVal, detectFaceMaxNum, combinedMask);
         if (afCode != ErrorInfo.MOK) {
-            Log.e(TAG, "initEngine error，code is :"+afCode);
+            Log.e(TAG, "InitEngine Error, RequestCode :"+afCode);
         }
+        Log.i(TAG, "InitEngine Success, RequestCode :" + afCode);
     }
 
     /**

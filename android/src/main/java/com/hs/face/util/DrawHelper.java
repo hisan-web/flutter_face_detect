@@ -193,20 +193,18 @@ public class DrawHelper {
         // 左上
         Rect rect = drawInfo.getRect();
         mPath.moveTo(rect.left, rect.top + rect.height() / 4);
-        mPath.lineTo(rect.left, rect.top);
-        mPath.lineTo(rect.left + rect.width() / 4, rect.top);
+        mPath.quadTo(rect.left, rect.top, rect.left + rect.width() / 4, rect.top);
+
         // 右上
         mPath.moveTo(rect.right - rect.width() / 4, rect.top);
-        mPath.lineTo(rect.right, rect.top);
-        mPath.lineTo(rect.right, rect.top + rect.height() / 4);
+        mPath.quadTo(rect.right, rect.top, rect.right, rect.top + rect.height() / 4);
         // 右下
         mPath.moveTo(rect.right, rect.bottom - rect.height() / 4);
-        mPath.lineTo(rect.right, rect.bottom);
-        mPath.lineTo(rect.right - rect.width() / 4, rect.bottom);
+        mPath.quadTo(rect.right, rect.bottom, rect.right - rect.width() / 4, rect.bottom);
+
         // 左下
         mPath.moveTo(rect.left + rect.width() / 4, rect.bottom);
-        mPath.lineTo(rect.left, rect.bottom);
-        mPath.lineTo(rect.left, rect.bottom - rect.height() / 4);
+        mPath.quadTo(rect.left, rect.bottom, rect.left, rect.bottom - rect.height() / 4);
         canvas.drawPath(mPath, paint);
 
         // 绘制文字，用最细的即可，避免在某些低像素设备上文字模糊
